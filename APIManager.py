@@ -1,0 +1,87 @@
+import pandas as pd
+import requests
+from datetime import datetime
+from PathUrls import PathUrls
+
+class APIManager:
+    
+    _baseUrl = "https://gateway.apilib.prefeitura.sp.gov.br/sf/sof/v4/"
+    
+    _headers = {"Authorization": "Bearer 4548610b-e673-32db-ba6f-6d68f78772f8"}
+    
+    _standardParams = None
+    
+    data = pd.DataFrame()
+    
+    def __init__(self, ano = datetime.now().year, mes = datetime.now().month):
+        self._standardParams = {
+          "ano": ano,
+          "mes": mes,
+          "codOrgao": 25,
+          "codUnidade": 10,
+          "codFuncao": 13,
+          }
+
+
+    def RequestEmpenhos(self):
+        pathUrl = PathUrls.empenhos.name
+        url = self._baseUrl + pathUrl
+        print(url)
+        
+        completeParams = self._standardParams.copy()
+        completeParams["anoEmpenho"] = completeParams.pop("ano")
+        completeParams["mesEmpenho"] = completeParams.pop("mes")
+        
+        response = requests.get(url, headers = self._headers, params = completeParams)
+        
+        responseData = pd.DataFrame(response.json()["lstEmpenhos"])
+        
+        self.data = responseData[[
+             "codOrgao", "txDescricaoOrgao",
+             "codUnidade", "txDescricaoUnidade",
+             "codFuncao", "txDescricaoFuncao",
+             "codSubFuncao", "txDescricaoSubFuncao",
+             "codProjetoAtividade", "txDescricaoProjetoAtividade",
+             "codPrograma", "txDescricaoPrograma",
+             "codCategoria", "txDescricaoCategoriaEconomica",
+             "codGrupo", "txDescricaoGrupoDespesa",
+             "codModalidade", "txDescricaoModalidade",
+             "codElemento", "txDescricaoElemento",
+             "codFonteRecurso", "txDescricaoFonteRecurso"
+             ]]
+        
+        return
+    
+    
+    def RequestDespesas(self):
+        pathUrl = PathUrls.despesas.name
+        url = self._baseUrl + pathUrl
+        print(url)
+        
+        if len(self.data) > 0:
+            print("passou")
+            for i in range(0, len(self.data)):
+                
+                completeParams = self._standardParams.copy()
+                completeParams["anoDotacao"] = completeParams.pop("ano")
+                completeParams["mesDotacao"] = completeParams.pop("mes")
+                completeParams.update({"codSubFuncao": self.data.loc[i, "codSubFuncao"], 
+                                       "codProjetoAtividade": self.data.loc[i, "codProjetoAtividade"], 
+                                       "codPrograma": self.data.loc[i, "codPrograma"],
+                                       "codCategoria": self.data.loc[i, "codCategoria"],
+                                       "codGrupo": self.data.loc[i, "codGrupo"],
+                                       "codModalidade": self.data.loc[i, "codModalidade"],
+                                       "codElemento": self.data.loc[i, "codElemento"],
+                                       "codFonteRecurso": self.data.loc[i, "codFonteRecurso"]})
+                
+                response = requests.get(url, headers = self._headers, params = completeParams)
+                
+                responseData = pd.DataFrame(response.json()["lstDespesas"])
+                responseData = responseData[["valOrcadoInicial", "valSuplementado", "valCongelado", "valDisponivel", "valReservadoLiquido"]]
+                print(responseData)
+                self.data.loc[i, responseData.keys()] = responseData.values
+                
+                self.data.drop(["codCategoria", "txDescricaoCategoriaEconomica", "codGrupo", "txDescricaoGrupoDespesa", "codModalidade", "txDescricaoModalidade", "codElemento", "txDescricaoElemento", "codFonteRecurso", "txDescricaoFonteRecurso"], axis = 1)
+        else:
+            print("não passou")
+            return
