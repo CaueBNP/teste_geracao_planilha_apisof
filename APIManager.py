@@ -7,13 +7,16 @@ class APIManager:
     
     _baseUrl = "https://gateway.apilib.prefeitura.sp.gov.br/sf/sof/v4/"
     
-    _headers = {"Authorization": "Bearer 4548610b-e673-32db-ba6f-6d68f78772f8"}
+    _headers = {"Authorization": None}
     
     _standardParams = None
     
     data = pd.DataFrame()
     
-    def __init__(self, ano = datetime.now().year, mes = datetime.now().month):
+    def __init__(self, token, ano = datetime.now().year, mes = datetime.now().month):
+        self._headers["Authorization"] =  f"Bearer {token}"
+        
+                
         self._standardParams = {
           "ano": ano,
           "mes": mes,
@@ -23,8 +26,9 @@ class APIManager:
           }
 
 
-    def RequestEmpenhos(self):
+    def RequestEmpenhos(self, filtered_columns):
         pathUrl = PathUrls.empenhos.name
+        print(self._headers)
         url = self._baseUrl + pathUrl
         print(url)
         
@@ -36,24 +40,12 @@ class APIManager:
         
         responseData = pd.DataFrame(response.json()["lstEmpenhos"])
         
-        self.data = responseData[[
-             "codOrgao", "txDescricaoOrgao",
-             "codUnidade", "txDescricaoUnidade",
-             "codFuncao", "txDescricaoFuncao",
-             "codSubFuncao", "txDescricaoSubFuncao",
-             "codProjetoAtividade", "txDescricaoProjetoAtividade",
-             "codPrograma", "txDescricaoPrograma",
-             "codCategoria", "txDescricaoCategoriaEconomica",
-             "codGrupo", "txDescricaoGrupoDespesa",
-             "codModalidade", "txDescricaoModalidade",
-             "codElemento", "txDescricaoElemento",
-             "codFonteRecurso", "txDescricaoFonteRecurso"
-             ]]
+        self.data = responseData[filtered_columns]
         
         return
     
     
-    def RequestDespesas(self):
+    def RequestDespesas(self, filtered_columns):
         pathUrl = PathUrls.despesas.name
         url = self._baseUrl + pathUrl
         print(url)
@@ -77,7 +69,7 @@ class APIManager:
                 response = requests.get(url, headers = self._headers, params = completeParams)
                 
                 responseData = pd.DataFrame(response.json()["lstDespesas"])
-                responseData = responseData[["valOrcadoInicial", "valSuplementado", "valCongelado", "valDisponivel", "valReservadoLiquido"]]
+                responseData = responseData[filtered_columns]
                 print(responseData)
                 self.data.loc[i, responseData.keys()] = responseData.values
                 
