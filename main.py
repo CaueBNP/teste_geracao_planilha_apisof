@@ -1,7 +1,8 @@
 from APIManager import APIManager
 from PathUrls import PathUrls
 
-apiManager = APIManager("4548610b-e673-32db-ba6f-6d68f78772f8")
+#Coloque seu Token da API no parâmetro do Objeto APIManager
+apiManager = APIManager("Seu token da API")
 
 filtered_columns = [
              "codOrgao", "txDescricaoOrgao",
