@@ -73,7 +73,7 @@ class APIManager:
                 print(responseData)
                 self.data.loc[i, responseData.keys()] = responseData.values
                 
-                self.data.drop(["codCategoria", "txDescricaoCategoriaEconomica", "codGrupo", "txDescricaoGrupoDespesa", "codModalidade", "txDescricaoModalidade", "codElemento", "txDescricaoElemento", "codFonteRecurso", "txDescricaoFonteRecurso"], axis = 1)
+            self.data.drop(["codCategoria", "txDescricaoCategoriaEconomica", "codGrupo", "txDescricaoGrupoDespesa", "codModalidade", "txDescricaoModalidade", "codElemento", "txDescricaoElemento", "codFonteRecurso", "txDescricaoFonteRecurso"], axis = 1)
         else:
             print("não passou")
             return
