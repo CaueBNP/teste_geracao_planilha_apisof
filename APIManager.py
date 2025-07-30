@@ -40,6 +40,18 @@ class APIManager:
         
         responseData = pd.DataFrame(response.json()["lstEmpenhos"])
         
+        responseData["cod_cta_desp"] = responseData["codCategoria"] + responseData["codGrupo"] + responseData["codModalidade"] + responseData["codElemento"] + "00"
+        responseData["Dotacao"] = responseData.assign(codProjetoAtividade_fmt = responseData["codProjetoAtividade"].astype(str).apply(lambda x: x[0] + "." + x[1:] if len(x) > 1 else x))[[
+            "codOrgao",
+            "codUnidade",
+            "codFuncao",
+            "codSubFuncao",
+            "codPrograma",
+            "codProjetoAtividade_fmt",
+            "cod_cta_desp",
+            "codFonteRecurso"
+        ]].astype(str).agg(".".join, axis=1)
+                        
         self.data = responseData[filtered_columns]
         
         return

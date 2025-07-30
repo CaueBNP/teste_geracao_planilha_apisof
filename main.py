@@ -15,7 +15,8 @@ filtered_columns = [
              "codGrupo", "txDescricaoGrupoDespesa",
              "codModalidade", "txDescricaoModalidade",
              "codElemento", "txDescricaoElemento",
-             "codFonteRecurso", "txDescricaoFonteRecurso"
+             "codFonteRecurso", "txDescricaoFonteRecurso",
+             "Dotacao", "cod_cta_desp"
              ]
 apiManager.RequestEmpenhos(filtered_columns)
 
