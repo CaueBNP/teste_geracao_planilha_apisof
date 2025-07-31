@@ -49,7 +49,8 @@ class APIManager:
             "codPrograma",
             "codProjetoAtividade_fmt",
             "cod_cta_desp",
-            "codFonteRecurso"
+            "codFonteRecurso",
+            "codSubElemento"
         ]].astype(str).agg(".".join, axis=1)
                         
         self.data = responseData[filtered_columns]
